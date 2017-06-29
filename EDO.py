@@ -31,3 +31,17 @@ def getMatrix(a, b, m, p, q, r, ya, yb):
 	MatB.append(r(x[m-1])*yb - (1/h**2) + p(x)/2*h)
 
 	return MatA, MatB
+
+def solve(A, b):
+	n = len(A)
+	L = [[1]]*n
+	U = [[]]*n
+	# TODO: Implementar resolução
+	print L
+
+if __name__ == '__main__':
+	def fun(x):
+		return 0
+	MatA, MatB = getMatrix(0, 1, 6, fun, fun, fun, 0, 1)
+	solve(MatA, MatB)
+
