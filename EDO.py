@@ -6,7 +6,6 @@ def getXH(x0, xm, m):
 
 def getMatrix(x0, xm, m, p, q, r, ya, yb):
 	x, h = getXH(x0, xm, m)
-	#print (x)
 	
 	d = [(-2/h**2) - q(xi) for xi in x[1:-1]]		#Main diagonal
 	c = [(1/h**2) + p(xi)/2*h for xi in x[1:-2]]	#Upper diagonal
@@ -18,11 +17,7 @@ def getMatrix(x0, xm, m, p, q, r, ya, yb):
 
 	b.append(r(x[m-1])*yb - (1/h**2) + p(x)/2*h)
 
-	#print(c)
-	#print(d)
-	#print(a)
-	#print(b)
-	return d, c, a, b
+	return d, c, a, b, x
 
 def LUdecomposition(a, d, c):
 
@@ -47,7 +42,7 @@ def solve(a, d, c, b):
 	for i in range( n-2, -1, -1 ):
 		x[i] = ( x[i] - c[i] * x[i+1] ) / d[i]
 
-	#print (x)
+	print (x)
 	return x
 
 
@@ -61,6 +56,7 @@ if __name__ == '__main__':
 		return x
 	def fun(x):
 		return 0
-	d, c, a, b = getMatrix(0, 1, 6, p, q, r, 0, exp(1))
-	solve(a, d, c, b)
+	d, c, a, b, x = getMatrix(0, 1, 10, p, q, r, 0, exp(1))
+	LUdecomposition(a, d, c)
+	y = solve(a, d, c, b)
 
