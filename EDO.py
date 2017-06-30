@@ -1,47 +1,66 @@
-def getXH(a, b, m):
-	h = 1.0*(b-a)/m
-	return [a + h*i for i in xrange(m+1)], h
+from math import exp
 
-def getLine(p, q, h, x):
-	line = []
-	line.append((1/h**2) - p(x)/2*h)
-	line.append((-2/h**2) - q(x))
-	line.append((1/h**2) + p(x)/2*h)
-	return line
+def getXH(x0, xm, m):
+	h = 1.0*(xm-x0)/m
+	return [x0 + h*i for i in range(m+1)], h
 
-def getMatrix(a, b, m, p, q, r, ya, yb):
-	x, h = getXH(a, b, m)
+def getMatrix(x0, xm, m, p, q, r, ya, yb):
+	x, h = getXH(x0, xm, m)
+	#print (x)
 	
-	MatA = [getLine(p, q, h, xi) for xi in x[2:-2]]
+	d = [(-2/h**2) - q(xi) for xi in x[1:-1]]		#Main diagonal
+	c = [(1/h**2) + p(xi)/2*h for xi in x[1:-2]]	#Upper diagonal
+	a = [(1/h**2) - p(x)/2*h for xi in x[2:-1]]		#Lower diagonal
 	
-	firstLine = []
-	firstLine.append((-2/h**2) - q(x[1]))
-	firstLine.append((1/h**2) + p(x[1])/2*h)
-	MatA.insert(0, firstLine)
-	
-	lastLine = []
-	lastLine.append((1/h**2) - p(x[m-1])/2*h)
-	lastLine.append((-2/h**2) - q(x[m-1]))
-	MatA.append(lastLine)
+	b = [r(xi) for xi in x[2:-2]]
 
-	MatB = [r(xi) for xi in x[2:-2]]
+	b.insert(0, r(x[1])*ya - (1/h**2) - p(x[1])/2*h)
 
-	MatB.insert(0, r(x[1])*ya - (1/h**2) - p(x[1])/2*h)
+	b.append(r(x[m-1])*yb - (1/h**2) + p(x)/2*h)
 
-	MatB.append(r(x[m-1])*yb - (1/h**2) + p(x)/2*h)
+	#print(c)
+	#print(d)
+	#print(a)
+	#print(b)
+	return d, c, a, b
 
-	return MatA, MatB
+def LUdecomposition(a, d, c):
 
-def solve(A, b):
-	n = len(A)
-	L = [[1]]*n
-	U = [[]]*n
-	# TODO: Implementar resolução
-	print L
+	n = len(d)
 
+	for i in range( 1, n ):
+		a[i-1] = a[i-1] / d[i-1]
+		d[i] = d[i] - a[i-1] * c[i-1]
+
+	return
+
+def solve(a, d, c, b):
+	n = len(d)
+	x = [0] * n
+	x[0] = b[0]
+
+	for i in range( 1, n ):
+		x[i] = b[i] - a[i-1] * x[i-1]
+
+	x[n-1] = x[n-1] / d[n-1]
+
+	for i in range( n-2, -1, -1 ):
+		x[i] = ( x[i] - c[i] * x[i+1] ) / d[i]
+
+	#print (x)
+	return x
+
+
+#TODO: Check WHAT A FUCK IS GOING ON! THIS FUNCKING SHIT IS A FUCING GARBAGE!
 if __name__ == '__main__':
+	def r(x):
+		return exp(x)*(x**2+1)
+	def p(x):
+		return -1
+	def q(x):
+		return x
 	def fun(x):
 		return 0
-	MatA, MatB = getMatrix(0, 1, 6, fun, fun, fun, 0, 1)
-	solve(MatA, MatB)
+	d, c, a, b = getMatrix(0, 1, 6, p, q, r, 0, exp(1))
+	solve(a, d, c, b)
 
