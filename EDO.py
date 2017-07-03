@@ -1,4 +1,5 @@
 from math import exp
+import matplotlib.pyplot as plt
 
 def getXH(m):
 	h = 1.0/m
@@ -38,6 +39,7 @@ def TDMA(a,b,c,d):
 
 	for i in xrange(-2, 0, -1):
 		x[i] = d[i] - c[i] *x[i+1]
+	print x
 	return x
 
 def Gauss(d, u, l, b):
@@ -71,8 +73,11 @@ if __name__ == '__main__':
 	def fun(x):
 		return 0
 	a, b, c, d, x = getMatrix(10, p, q, r, 0, exp(1))
-	#print(TDMA(a,b,c,d))
-	Gauss(b,c,a,d)
+	#TDMA(a,b,c,d)
+	y = Gauss(b,c,a,d)
+	y = [0] + y + [exp(1)]
+	plt.plot(x, y)
+	plt.show()
 	#TDMASolve(a, d, c, b)
 	#LUdecomposition(a, d, c)
 	#adc dac cda acd dca
