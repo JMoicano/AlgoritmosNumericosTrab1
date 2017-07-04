@@ -1,4 +1,3 @@
-from problemas import *
 from math import exp
 import matplotlib.pyplot as plt
 from math import exp
@@ -17,45 +16,42 @@ def getMatrix(m, p, q, r, ya, yb):
         x, h = getXH(m)
         
         b = [(-2.0/h**2) + q(xi) for xi in x[1:-1]]             #Main diagonal
-        c = [(1.0/h**2) + p(xi)/2.0*h for xi in x[1:-2]]        #Upper diagonal
-        a = [(1.0/h**2) - p(xi)/2.0*h for xi in x[2:-1]]        #Lower diagonal
+        c = [(1.0/h**2) + p(xi)/(2.0*h) for xi in x[1:-2]]        #Upper diagonal
+        a = [(1.0/h**2) - p(xi)/(2.0*h) for xi in x[2:-1]]        #Lower diagonal
         
         d = [r(xi) for xi in x[2:-2]]
 
-        d.insert(0, r(x[1]) - ((1.0/h**2) - p(x[1])/2.0*h)*ya)
+        d.insert(0, r(x[1]) - ((1.0/h**2) - p(x[1])/(2.0*h))*ya)
 
-        d.append(r(x[m-1]) - ((1.0/h**2) + p(x[m-1])/2.0*h)*yb)
+        d.append(r(x[m-1]) - ((1.0/h**2) + p(x[m-1])/(2.0*h))*yb)
 
         return a, b, c, d, x
 
-def Gauss(d, u, l, b):
+def Gauss(a, b, c, d):
 	'''
 	The Gaussian method for a tridiagonal matrix
 	'''
-        s = []
-        n = len(l)
-        for i in xrange(n-1):
-                m = l[i]/d[i]
-                l[i] = 0
-                d[i+1] = d[i+1] - m * u[i]
-                b[i+1] = b[i+1] - m * b[i]
+	nf = len(b)     
+	for it in xrange(1, nf):
+		m = a[it-1]/b[it-1]
+		b[it] = b[it] - m*c[it-1] 
+		d[it] = d[it] - m*d[it-1]
 
-        for i in xrange(n-1,-1, -1):
-                m = u[i]/d[i+1]
-                u[i] = 0
-                b[i] = b[i] - m * b[i+1]
+	y = d
+	y[-1] = d[-1]/b[-1]
 
-        for i in xrange(n+1):
-                s.append(b[i]/d[i])
+	for il in xrange(nf-2, -1, -1):
+		y[il] = (d[il]-c[il-1]*y[il+1])/b[il]
 
-        return s
+
+	return y
 
 def run(m, p, q, r, ya, yb):
 	'''
 	Given a problem, solve it
 	'''
-        l, d, u, b, x = getMatrix(m, p, q, r, ya, yb)
-        y = [ya] + Gauss(d, u, l, b) + [yb]
+        a, b, c, d, x = getMatrix(m, p, q, r, ya, yb)
+        y = [ya] + Gauss(a, b, c, d) + [yb]
         return x, y
 
 def problem1():
@@ -104,13 +100,17 @@ def mainMenu():
 		else:
 			print line, "nao e uma opcao valida"
 
-def menuArgs():
+def menuArgs(option):
 	m = raw_input("Escolha m (a discretizacao do problema): ")
 	m = int(m.strip())
-	ya = raw_input("Escolha valor de contorno ya (para y(0)): ")
-	ya = float(ya.strip())
-	yb = raw_input("Escolha valor de contorno yb (para y(1)): ")
-	yb = float(yb.strip())
+	if option == 3:
+		ya = 0
+		yb = exp(1)
+	else:
+		ya = raw_input("Escolha valor de contorno ya (para y(0)): ")
+		ya = float(ya.strip())
+		yb = raw_input("Escolha valor de contorno yb (para y(1)): ")
+		yb = float(yb.strip())
 	return m, ya, yb
 
 
@@ -120,9 +120,7 @@ def main():
 		option = mainMenu()
 		if option < 4:
 			p, q, r = options[option]()
-			m, ya, yb = menuArgs()
-			if option == 3:
-				ya, yb = 0, exp(1)
+			m, ya, yb = menuArgs(option)
 			x, y = run(m, p, q, r, ya, yb)
 			print "Para os valores de X:", x
 			print "Temos Y:", y
